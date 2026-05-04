@@ -201,7 +201,15 @@ body{
   position:relative;
   z-index:2;
   box-shadow:0 4px 10px rgba(0,0,0,.15);
+  cursor:pointer;
+  transition:transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
 }
+.all-minutes:hover{
+  transform:scale(1.015);
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  border-color:rgba(255,255,255,.9);
+}
+.all-minutes:active{transform:scale(.995)}
 .all-minutes .am-title{
   font-family:var(--display);
   font-size:16px;
@@ -1203,7 +1211,7 @@ body{
         <div class="refund-saveArea"></div>
         <div class="refund-content">
           <div class="refund-navbar">
-            <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="icon-btn back-arrow" type="button" data-back="1" aria-label="back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
           <div class="refund-block">
             <div class="refund-hero">
@@ -1254,7 +1262,7 @@ body{
         <div class="refund-saveArea"></div>
         <div class="refund-content">
           <div class="refund-navbar">
-            <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="icon-btn back-arrow" type="button" data-back="1" aria-label="back"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           </div>
           <div class="refund-block">
             <div class="refund-hero">
@@ -1446,10 +1454,15 @@ document.querySelectorAll('.lang-toggle button').forEach(b=>{
 // ===== Navigation =====
 const screenEls = document.querySelectorAll('.screen');
 const popupEls = document.querySelectorAll('.popup-overlay');
+let lastInternalScreen = 's1'; // remembered when user enters refund flow
+
+function currentScreenId(){
+  const cur = document.querySelector('.screen.active');
+  return cur ? cur.id : null;
+}
 
 function showScreen(id){
   screenEls.forEach(s => s.classList.toggle('active', s.id === id));
-  // scroll to top of new screen
   const el = document.getElementById(id);
   if(el) el.scrollTop = 0;
 }
@@ -1473,9 +1486,27 @@ document.querySelectorAll('[data-go]').forEach(el=>{
   });
 });
 
-// Special re-mapping: tap-hint elements (e.g. screen 2 streak widget) should
-// also navigate, but children buttons should not trigger them. handled with
-// stopPropagation above.
+// .all-minutes banner — click anywhere on the card jumps to refund (s7).
+// Children with data-go (e.g. the "Забрать награду" button on Screen 4)
+// already call stopPropagation, so they keep their own destinations.
+document.querySelectorAll('.all-minutes').forEach(el => {
+  el.addEventListener('click', () => {
+    const cur = currentScreenId();
+    if(cur && cur.startsWith('s') && cur !== 's7' && cur !== 's8'){
+      lastInternalScreen = cur;
+    }
+    hidePopups();
+    showScreen('s7');
+  });
+});
+
+// Back arrows on refund screens return to the Internal screen the user came from.
+document.querySelectorAll('[data-back]').forEach(el => {
+  el.addEventListener('click', e => {
+    e.stopPropagation();
+    showScreen(lastInternalScreen);
+  });
+});
 
 // Init
 applyLang('ru');

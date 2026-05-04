@@ -1,0 +1,1484 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Streak — Concept 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-primary:#161616;
+  --bg-secondary:#242424;
+  --text-primary:#fff;
+  --text-secondary:#b9b9b9;
+  --text-disabled:#6e6e6e;
+  --text-inverted:#161616;
+  --accent:#6eff46;
+  --lime-a:#c2ef43;
+  --lime-b:#6eff46;
+  --reward-grad: radial-gradient(ellipse 120% 180% at 5% 100%,
+    #ffffff 0%,
+    #d2ffc5 28%,
+    #a4ff8b 48%,
+    #d2cfc1 70%,
+    #ff9ff7 92%);
+  --display:'Russo One', system-ui, sans-serif;
+  --body:'Montserrat', system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+html,body{min-height:100%}
+body{
+  background:#0a0a0a;
+  color:#fff;
+  font-family:var(--body);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:60px 0;
+  overflow-x:hidden;
+}
+
+/* Lang toggle */
+.lang-toggle{
+  position:fixed;
+  top:24px;
+  right:24px;
+  display:flex;
+  background:#1a1a1a;
+  border:1px solid #2c2c2c;
+  border-radius:999px;
+  padding:4px;
+  z-index:100;
+  font-family:var(--display);
+  letter-spacing:1px;
+}
+.lang-toggle button{
+  background:transparent;
+  color:#888;
+  border:none;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:inherit;
+  letter-spacing:inherit;
+}
+.lang-toggle button.active{
+  background:var(--accent);
+  color:#0a0a0a;
+}
+
+/* Phone frame */
+.phone-shell{
+  position:relative;
+  width:380px;
+  height:834px;
+  border-radius:48px;
+  background:#1d1d1d;
+  padding:10px;
+  box-shadow:
+    0 0 0 2px #2a2a2a,
+    0 60px 120px rgba(0,0,0,.8),
+    0 0 80px rgba(110,255,70,.04);
+}
+.phone-screen{
+  position:relative;
+  width:360px;
+  height:814px;
+  background:var(--bg-primary);
+  border-radius:38px;
+  overflow:hidden;
+}
+
+/* Screen container */
+.screen{
+  position:absolute;
+  inset:0;
+  background:var(--bg-primary);
+  overflow-y:auto;
+  overflow-x:hidden;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 280ms ease;
+  scrollbar-width:none;
+}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{
+  opacity:1;
+  pointer-events:auto;
+  z-index:1;
+}
+
+/* Status bar */
+.statusbar{
+  height:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  font-family:'Roboto', system-ui, sans-serif;
+  font-size:12px;
+  color:#fff;
+  position:relative;
+  z-index:5;
+}
+.statusbar .clock{display:flex;gap:2px;align-items:baseline}
+.statusbar .clock .pm{margin-left:4px;font-size:10px}
+.statusbar .icons{display:flex;gap:8px;align-items:center}
+.statusbar .icons svg{display:block}
+
+/* Top banner background */
+.top-banner{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:160px;
+  background:
+    radial-gradient(120% 100% at 100% 0%, #6c4dde 0%, transparent 60%),
+    radial-gradient(140% 100% at 0% 0%, #ff7a5c 0%, transparent 55%),
+    radial-gradient(120% 100% at 50% 30%, #f3a4d4 0%, transparent 70%),
+    linear-gradient(180deg, #2a1f3a 0%, var(--bg-primary) 100%);
+  z-index:0;
+}
+
+/* Navigation bar (back / title / help) */
+.navbar{
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;
+  z-index:5;
+  padding:0 16px;
+}
+.navbar .icon-btn{
+  width:24px;
+  height:24px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.navbar .nav-title{
+  font-family:var(--display);
+  font-size:14px;
+  letter-spacing:1px;
+  color:#fff;
+}
+.navbar .nav-side{width:24px;display:flex;justify-content:flex-end}
+.navbar .nav-side.left{justify-content:flex-start}
+
+/* Page caption (Wallet description) */
+.page-caption{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:14px;
+  line-height:20px;
+  letter-spacing:0.14px;
+  color:#fff;
+  padding:8px 16px 0;
+  position:relative;
+  z-index:5;
+}
+
+/* All Minutes glass card */
+.all-minutes{
+  margin:20px 16px 0;
+  border-radius:16px;
+  border:0.5px solid rgba(255,255,255,.7);
+  background:linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.3));
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position:relative;
+  z-index:2;
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+.all-minutes .am-title{
+  font-family:var(--display);
+  font-size:16px;
+  line-height:20px;
+  letter-spacing:0.16px;
+  color:#fff;
+}
+.all-minutes .am-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+.all-minutes .am-row .am-key{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+  flex:1;
+}
+.all-minutes .am-row .am-val{
+  display:flex;
+  gap:2px;
+  align-items:center;
+  white-space:nowrap;
+}
+.all-minutes .am-row .am-val .num{
+  font-family:var(--display);
+  font-size:14px;
+  letter-spacing:0.14px;
+  color:#fff;
+}
+.all-minutes .am-row .am-val .slash{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:12px;
+  color:#fff;
+}
+.all-minutes .am-row .am-val .all-num{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:12px;
+  color:#fff;
+}
+.am-progress{
+  height:4px;
+  background:rgba(255,255,255,.1);
+  border-radius:100px;
+  position:relative;
+  overflow:hidden;
+}
+.am-progress .fill{
+  position:absolute;
+  inset:0;
+  width:34%;
+  background:linear-gradient(178deg, var(--lime-a), var(--lime-b));
+  border-radius:100px;
+}
+
+/* Milestone-pill variant of the progress bar (Screen 1) */
+.am-milestones{
+  position:relative;
+  height:48px;
+  margin-top:4px;
+}
+.am-milestones .track{
+  position:absolute;
+  left:0;
+  right:0;
+  top:32px;
+  height:4px;
+  background:rgba(255,255,255,.12);
+  border-radius:100px;
+}
+.am-milestones .track .fill{
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:14%;
+  background:linear-gradient(90deg, var(--lime-a), var(--lime-b));
+  border-radius:100px;
+  box-shadow:0 0 12px rgba(110,255,70,.55);
+}
+.am-milestones .pill{
+  position:absolute;
+  top:8px;
+  transform:translateX(-50%);
+  font-family:var(--display);
+  font-size:11px;
+  letter-spacing:0.4px;
+  padding:3px 9px;
+  border-radius:100px;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  white-space:nowrap;
+  line-height:14px;
+  z-index:2;
+}
+.am-milestones .pill.active{
+  background:var(--accent);
+  color:var(--text-inverted);
+  box-shadow:0 0 10px rgba(110,255,70,.4);
+}
+
+/* Balance card */
+.balance{
+  margin:20px 16px 0;
+  background:var(--bg-secondary);
+  border-radius:32px;
+  padding:24px 0;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+.balance-top{padding:0 16px;display:flex;flex-direction:column;gap:4px}
+.balance-top .bal-row{display:flex;align-items:center;gap:8px}
+.balance-top .bal-row .val{
+  font-family:var(--display);
+  font-size:24px;
+  line-height:28px;
+  letter-spacing:0.24px;
+  color:#fff;
+}
+.balance-top .bal-row .info-icon{color:var(--text-secondary);width:24px;height:24px}
+.balance-top .bal-label{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.28px;
+  color:var(--text-secondary);
+}
+.tokens{display:flex;flex-direction:column;gap:8px}
+.token-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:6px 16px 6px 12px;
+  height:52px;
+}
+.token-row .icon{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background-size:cover;
+  background-position:center;
+  flex-shrink:0;
+}
+.token-row .text{flex:1;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.token-row .name{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+}
+.token-row .rate{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:var(--text-secondary);
+}
+.token-row .value{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  align-items:flex-end;
+}
+.token-row .qty{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+}
+.token-row .usd{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:var(--text-secondary);
+}
+
+/* Streak widget */
+.streak-widget{
+  margin:20px 16px 0;
+  padding:20px 12px;
+  background:rgba(255,255,255,.05);
+  border-radius:24px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:center;
+}
+.streak-widget .streak-image{
+  width:180px;
+  height:115px;
+  background-image:url("assets/coin_doppy.png"), url("assets/coin_doppy.png");
+  background-size:contain, contain;
+  background-position:30% center, 70% center;
+  background-repeat:no-repeat, no-repeat;
+}
+.streak-widget .streak-image.coins-pair{
+  width:200px;
+  height:130px;
+  background:none;
+  position:relative;
+}
+.streak-widget .streak-image.coins-pair::before,
+.streak-widget .streak-image.coins-pair::after{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  background:url("assets/coin_doppy.png") center/contain no-repeat;
+  top:50%;
+  transform:translateY(-50%);
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));
+}
+.streak-widget .streak-image.coins-pair::before{left:10px;transform:translateY(-50%) rotate(-8deg)}
+.streak-widget .streak-image.coins-pair::after{right:10px;transform:translateY(-50%) rotate(6deg)}
+.streak-widget .streak-title{
+  font-family:var(--display);
+  font-size:20px;
+  line-height:24px;
+  letter-spacing:0.2px;
+  color:#fff;
+  text-align:center;
+  width:100%;
+  padding:0 8px;
+}
+.streak-widget .streak-body{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+  text-align:center;
+  padding:0 8px;
+}
+.streak-days{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  padding:8px 0;
+  flex-wrap:wrap;
+}
+.streak-days.compact{gap:12px}
+.streak-days.seven{gap:12px}
+.day{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  min-width:32px;
+}
+.day .marker{
+  width:32px;
+  height:32px;
+  background:url("assets/fire_emoji.png") center/contain no-repeat;
+}
+.day.empty .marker{
+  background:transparent;
+  border:2.667px solid var(--text-disabled);
+  border-radius:50%;
+}
+.day .label{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+  white-space:nowrap;
+}
+.day.compact .label{font-size:12px}
+
+/* Offer card inside streak */
+.offer-card{
+  margin-top:0;
+  width:100%;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:20px;
+  padding:12px 8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+}
+.offer-card .offer-text{
+  font-family:var(--display);
+  font-size:16px;
+  line-height:20px;
+  letter-spacing:0.32px;
+  color:#fff;
+  text-align:center;
+}
+.btn-pill-small{
+  background:#fff;
+  color:var(--text-inverted);
+  border:none;
+  border-radius:12px;
+  padding:10px 12px;
+  font-family:var(--display);
+  font-size:10px;
+  line-height:12px;
+  letter-spacing:0.8px;
+  text-transform:uppercase;
+  cursor:pointer;
+}
+
+/* Reward (gradient) button */
+.btn-reward{
+  width:100%;
+  height:52px;
+  border:none;
+  border-radius:20px;
+  background:var(--reward-grad);
+  font-family:var(--display);
+  font-size:12px;
+  letter-spacing:0.72px;
+  text-transform:uppercase;
+  color:var(--text-inverted);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+}
+.btn-reward.compact-radius{border-radius:20px}
+
+/* Outline green button */
+.btn-outline-green{
+  width:100%;
+  height:52px;
+  background:var(--bg-primary);
+  border:1px solid var(--accent);
+  color:var(--accent);
+  border-radius:20px;
+  font-family:var(--display);
+  font-size:12px;
+  letter-spacing:0.72px;
+  text-transform:uppercase;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Bottom safe area home indicator */
+.home-indicator{
+  height:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.home-indicator::after{
+  content:"";
+  width:64px;
+  height:2px;
+  background:#fff;
+  border-radius:32px;
+}
+
+/* Internal page main container */
+.page-internal{
+  position:relative;
+  min-height:100%;
+  padding-bottom:24px;
+}
+.page-content{
+  position:relative;
+  z-index:2;
+}
+
+/* ==== Popup ==== */
+.popup-overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 16px;
+  z-index:10;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 240ms ease;
+}
+.popup-overlay.active{opacity:1;pointer-events:auto;z-index:20}
+.popup-card{
+  width:328px;
+  background:rgba(36,36,36,.88);
+  border-radius:32px;
+  padding:16px 24px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  align-items:center;
+  filter:drop-shadow(0 4px 2px rgba(0,0,0,.25));
+  position:relative;
+  transform:scale(.95);
+  transition:transform 240ms ease;
+}
+.popup-overlay.active .popup-card{transform:scale(1)}
+.popup-cross{
+  position:absolute;
+  top:16px;
+  right:16px;
+  width:24px;
+  height:24px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--text-secondary);
+  z-index:2;
+}
+.popup-image{
+  width:280px;
+  height:180px;
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+.popup-text{display:flex;flex-direction:column;gap:12px;width:100%;text-align:center;color:#fff}
+.popup-title{
+  font-family:var(--display);
+  font-size:20px;
+  line-height:24px;
+  letter-spacing:0.2px;
+}
+.popup-subtitle{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:14px;
+  line-height:20px;
+  letter-spacing:0.14px;
+}
+
+/* ==== Refund (screen 7 / 8) ==== */
+.refund-page{
+  position:relative;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+.refund-saveArea{
+  height:194px;
+  background:#000;
+  flex-shrink:0;
+  position:relative;
+}
+.refund-content{
+  flex:1;
+  background:linear-gradient(180deg, #323232 0%, var(--bg-primary) 30%);
+  position:relative;
+  overflow:hidden;
+}
+.refund-content::before{
+  content:"";
+  position:absolute;
+  top:64px;
+  left:50%;
+  transform:translateX(-50%);
+  width:514px;
+  height:158px;
+  background:url("assets/refund_coins_bg.png") center/contain no-repeat;
+  opacity:.55;
+  pointer-events:none;
+}
+.refund-navbar{
+  height:64px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  position:relative;
+  z-index:3;
+}
+.refund-block{
+  position:relative;
+  z-index:3;
+  margin:88px 16px 0;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:center;
+}
+.refund-hero{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 8px;
+  justify-content:center;
+  align-items:center;
+}
+.refund-hero .hero-text{
+  font-family:var(--display);
+  font-size:20px;
+  line-height:24px;
+  letter-spacing:0.2px;
+  color:#fff;
+}
+.refund-hero .hero-pill{
+  background:var(--accent);
+  color:var(--text-inverted);
+  font-family:var(--display);
+  font-size:24px;
+  line-height:28px;
+  letter-spacing:0.24px;
+  padding:2px 12px;
+  border-radius:12px;
+}
+.refund-subtitle{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:20px;
+  letter-spacing:0.28px;
+  color:#fff;
+  text-align:center;
+  width:100%;
+}
+.refund-progress-zone{
+  position:relative;
+  z-index:3;
+  margin:32px 16px 0;
+  height:40px;
+}
+.refund-progress-bar{
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,.1);
+  border-radius:32px;
+  overflow:hidden;
+}
+.refund-progress-bar .fill{
+  position:absolute;
+  top:0;
+  left:0;
+  bottom:0;
+  background:linear-gradient(90deg, var(--lime-a), var(--lime-b));
+  border-radius:32px;
+  box-shadow:0 0 24px rgba(110,255,70,.55);
+}
+.streak-status-pill{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:var(--bg-primary);
+  border:0.5px solid #fff;
+  border-radius:20px;
+  padding:8px 12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  filter:drop-shadow(0 4px 2px rgba(0,0,0,.3));
+  white-space:nowrap;
+}
+.streak-status-pill .small{
+  font-family:var(--display);
+  font-size:10px;
+  line-height:12px;
+  letter-spacing:0.1px;
+  color:#fff;
+}
+.streak-status-pill .big{
+  font-family:var(--display);
+  font-size:16px;
+  line-height:20px;
+  letter-spacing:0.16px;
+  color:#fff;
+}
+.refund-milestones{
+  position:relative;
+  z-index:3;
+  margin:32px 16px 0;
+  display:flex;
+  justify-content:space-between;
+  padding:0 4px;
+  gap:4px;
+}
+.milestone{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  flex:1;
+  text-align:center;
+}
+.milestone.dim{opacity:.5}
+.milestone .marker{
+  width:0;
+  height:0;
+  border-left:8px solid transparent;
+  border-right:8px solid transparent;
+  border-bottom:0;
+  border-top:10px solid #888;
+}
+.milestone.active .marker{border-top-color:var(--accent)}
+.milestone .day-count{
+  font-family:var(--body);
+  font-weight:500;
+  font-size:12px;
+  line-height:14px;
+  letter-spacing:0.06px;
+  color:#fff;
+}
+.milestone .reward{
+  font-family:var(--display);
+  font-size:14px;
+  line-height:16px;
+  letter-spacing:0.14px;
+  color:#fff;
+}
+.milestone.active .day-count,
+.milestone.active .reward{color:var(--accent)}
+
+.refund-buttons{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:40px 16px 24px;
+  background:linear-gradient(180deg, rgba(22,22,22,0) 0%, var(--bg-primary) 24%);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:4;
+}
+
+/* Token sprites — color-coded fallbacks if images are missing */
+.icon-doppy{background:url("assets/coin_doppy.png") center/cover no-repeat}
+.icon-bnh{background:url("assets/coin_cheel.png") center/cover no-repeat, url("assets/coin_cheel_bg.png") center/cover no-repeat}
+.icon-lumy{background:url("assets/coin_lumy.png") center/cover no-repeat}
+
+/* Reward button highlight on the all-minutes card */
+.am-action{margin-top:8px}
+
+/* Hint dot to suggest tappable area on screen 2 */
+.tap-hint{
+  position:relative;
+  cursor:pointer;
+}
+.tap-hint::after{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:24px;
+  border:1px dashed rgba(110,255,70,.0);
+  transition:border-color 240ms;
+}
+.tap-hint:hover::after{border-color:rgba(110,255,70,.45)}
+
+/* desktop-only label under the phone */
+.phone-caption{
+  position:absolute;
+  bottom:-40px;
+  left:0;
+  right:0;
+  text-align:center;
+  font-family:var(--display);
+  font-size:11px;
+  letter-spacing:2px;
+  color:#444;
+  text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="lang-toggle" role="tablist" aria-label="Language">
+  <button data-lang="ru" class="active" type="button">RU</button>
+  <button data-lang="en" type="button">EN</button>
+</div>
+
+<div class="phone-shell">
+  <div class="phone-screen" id="phoneScreen">
+
+    <!-- ============ SCREEN 1: Internal — start of streak ============ -->
+    <section class="screen active" id="s1" data-screen="s1">
+      <div class="page-internal">
+        <div class="top-banner"></div>
+
+        <div class="statusbar">
+          <div class="clock">09:30 <span class="pm">PM</span></div>
+          <div class="icons">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M3 11l8-8" stroke="#fff" stroke-width="1"/></svg>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 1c2.5 0 4.7 1 6.4 2.6l-1 1A7 7 0 0 0 7.5 2.5 7 7 0 0 0 2 4.6l-1-1A9 9 0 0 1 7.5 1Z" fill="#fff"/><path d="M7.5 4.5a5.5 5.5 0 0 1 4 1.6l-1 1A4 4 0 0 0 7.5 6 4 4 0 0 0 4.5 7l-1-1a5.5 5.5 0 0 1 4-1.5Z" fill="#fff"/><circle cx="7.5" cy="9" r="1.5" fill="#fff"/></svg>
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><path d="M16 14H2V8l5-5h6l3 3v8z" stroke="#fff" stroke-width="1.2"/></svg>
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x="0.5" y="0.5" width="17" height="10" rx="2" stroke="#fff"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#fff"/><rect x="18" y="3.5" width="1.5" height="4" rx="0.7" fill="#fff"/></svg>
+          </div>
+        </div>
+
+        <div class="navbar">
+          <button class="icon-btn" type="button" aria-label="back">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="nav-title" data-i18n="nav.wallet">Кошелек</div>
+          <button class="icon-btn" type="button" aria-label="help">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2v.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#fff"/></svg>
+          </button>
+        </div>
+
+        <div class="page-content">
+          <p class="page-caption" data-i18n="caption.walletDescription">
+            Здесь ваш кошелёк. Все заработанные деньги поступят на этот счёт.
+          </p>
+
+          <!-- All Minutes -->
+          <div class="all-minutes">
+            <div class="am-title" data-i18n="minutes.title">Заработай до $1500</div>
+            <div class="am-row">
+              <div class="am-key" data-i18n="minutes.body">Получай 3 награды ежедневно</div>
+              <div class="am-val">
+                <span class="num">30</span>
+                <span class="slash">/</span>
+                <span class="all-num" data-i18n="minutes.unit">365 дней</span>
+              </div>
+            </div>
+            <div class="am-milestones">
+              <div class="track"><div class="fill"></div></div>
+              <span class="pill active" style="left:14%">$7</span>
+              <span class="pill" style="left:38%">$30</span>
+              <span class="pill" style="left:64%">$500</span>
+              <span class="pill" style="left:90%">$1500</span>
+            </div>
+          </div>
+
+          <!-- Balance -->
+          <div class="balance">
+            <div class="balance-top">
+              <div class="bal-row">
+                <span class="val">≈$955.84</span>
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b9b9b9" stroke-width="1.5"/><circle cx="12" cy="8" r="1" fill="#b9b9b9"/><path d="M12 11v6" stroke="#b9b9b9" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="bal-label" data-i18n="balance.label">Balance</div>
+            </div>
+            <div class="tokens">
+              <div class="token-row">
+                <div class="icon icon-doppy"></div>
+                <div class="text">
+                  <div class="name" data-i18n="token.doppy">DOPPY</div>
+                  <div class="rate" data-i18n="token.doppyRate">1 ~ $2.63</div>
+                </div>
+                <div class="value"><div class="qty">144</div><div class="usd">~$378.72</div></div>
+              </div>
+              <div class="token-row">
+                <div class="icon icon-bnh"></div>
+                <div class="text">
+                  <div class="name" data-i18n="token.bnh">BNH</div>
+                  <div class="rate" data-i18n="token.bnhRate">1 ~ $10.64</div>
+                </div>
+                <div class="value"><div class="qty">6</div><div class="usd">~$63.84</div></div>
+              </div>
+              <div class="token-row">
+                <div class="icon icon-lumy"></div>
+                <div class="text">
+                  <div class="name" data-i18n="token.lumy">LUMY</div>
+                </div>
+                <div class="value"><div class="qty">2</div><div class="usd">~$462.28</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streak widget — 3 days -->
+          <div class="streak-widget">
+            <div class="streak-title" data-i18n="streak1.title">Разблокируй Вывод DOPPY</div>
+            <div class="streak-body" data-i18n="streak1.body">
+              Заходи в ленту каждый день и собирай по 3 награды — 3 дня подряд, и вывод разблокирован!
+            </div>
+            <div class="streak-days compact">
+              <div class="day"><div class="marker"></div><div class="label"><span>1</span> <span data-i18n="streak1.day">день</span></div></div>
+              <div class="day"><div class="marker"></div><div class="label"><span>2</span> <span data-i18n="streak1.day">день</span></div></div>
+              <div class="day empty"><div class="marker"></div><div class="label"><span>3</span> <span data-i18n="streak1.day">день</span></div></div>
+            </div>
+            <div class="offer-card">
+              <div class="offer-text" data-i18n="streak1.offerTitle">Активируй буст заработка<br>и разблокируй вывод сразу</div>
+              <button class="btn-pill-small" type="button" data-go="s2" data-i18n="streak1.offerCta">АКТИВИРОВАТЬ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 2: Internal — 7-day streak with image ============ -->
+    <section class="screen" id="s2" data-screen="s2">
+      <div class="page-internal">
+        <div class="top-banner"></div>
+
+        <div class="statusbar">
+          <div class="clock">09:30 <span class="pm">PM</span></div>
+          <div class="icons">
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M3 11l8-8" stroke="#fff" stroke-width="1" fill="none"/></svg>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 1c2.5 0 4.7 1 6.4 2.6l-1 1A7 7 0 0 0 7.5 2.5 7 7 0 0 0 2 4.6l-1-1A9 9 0 0 1 7.5 1Z" fill="#fff"/><path d="M7.5 4.5a5.5 5.5 0 0 1 4 1.6l-1 1A4 4 0 0 0 7.5 6 4 4 0 0 0 4.5 7l-1-1a5.5 5.5 0 0 1 4-1.5Z" fill="#fff"/><circle cx="7.5" cy="9" r="1.5" fill="#fff"/></svg>
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><path d="M16 14H2V8l5-5h6l3 3v8z" stroke="#fff" stroke-width="1.2"/></svg>
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x="0.5" y="0.5" width="17" height="10" rx="2" stroke="#fff"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#fff"/><rect x="18" y="3.5" width="1.5" height="4" rx="0.7" fill="#fff"/></svg>
+          </div>
+        </div>
+
+        <div class="navbar">
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-title" data-i18n="nav.wallet">Кошелек</div>
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2v.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#fff"/></svg></button>
+        </div>
+
+        <div class="page-content">
+          <p class="page-caption" data-i18n="caption.walletDescription">
+            Здесь ваш кошелёк. Все заработанные деньги поступят на этот счёт.
+          </p>
+
+          <div class="all-minutes">
+            <div class="am-title" data-i18n="minutes.title">Заработай до $1500</div>
+            <div class="am-row">
+              <div class="am-key" data-i18n="minutes.body">Получай 3 награды ежедневно</div>
+              <div class="am-val"><span class="num">30</span><span class="slash">/</span><span class="all-num" data-i18n="minutes.unit">365 дней</span></div>
+            </div>
+            <div class="am-progress"><div class="fill"></div></div>
+          </div>
+
+          <div class="balance">
+            <div class="balance-top">
+              <div class="bal-row">
+                <span class="val">≈$955.84</span>
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b9b9b9" stroke-width="1.5"/><circle cx="12" cy="8" r="1" fill="#b9b9b9"/><path d="M12 11v6" stroke="#b9b9b9" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="bal-label" data-i18n="balance.label">Balance</div>
+            </div>
+            <div class="tokens">
+              <div class="token-row"><div class="icon icon-doppy"></div><div class="text"><div class="name" data-i18n="token.doppy">DOPPY</div><div class="rate" data-i18n="token.doppyRate">1 ~ $2.63</div></div><div class="value"><div class="qty">144</div><div class="usd">~$378.72</div></div></div>
+              <div class="token-row"><div class="icon icon-bnh"></div><div class="text"><div class="name" data-i18n="token.bnh">BNH</div><div class="rate" data-i18n="token.bnhRate">1 ~ $10.64</div></div><div class="value"><div class="qty">6</div><div class="usd">~$63.84</div></div></div>
+              <div class="token-row"><div class="icon icon-lumy"></div><div class="text"><div class="name" data-i18n="token.lumy">LUMY</div></div><div class="value"><div class="qty">2</div><div class="usd">~$462.28</div></div></div>
+            </div>
+          </div>
+
+          <!-- Streak widget — 7 days, 3 done, 4 empty -->
+          <div class="streak-widget tap-hint" data-go="s3">
+            <div class="streak-image coins-pair"></div>
+            <div class="streak-title" data-i18n="streak2.title">Получи $7 в DOPPY</div>
+            <div class="streak-body" data-i18n="streak2.body">Заходи в ленту каждый день и собирай по 3 награды — 7 дней подряд!</div>
+            <div class="streak-days seven">
+              <div class="day compact"><div class="marker"></div><div class="label">1</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">2</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">3</div></div>
+              <div class="day compact empty"><div class="marker"></div><div class="label">4</div></div>
+              <div class="day compact empty"><div class="marker"></div><div class="label">5</div></div>
+              <div class="day compact empty"><div class="marker"></div><div class="label">6</div></div>
+              <div class="day compact empty"><div class="marker"></div><div class="label">7</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 3: Internal — 7-day streak full + Claim button ============ -->
+    <section class="screen" id="s3" data-screen="s3">
+      <div class="page-internal">
+        <div class="top-banner"></div>
+
+        <div class="statusbar">
+          <div class="clock">09:30 <span class="pm">PM</span></div>
+          <div class="icons">
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M3 11l8-8" stroke="#fff" stroke-width="1" fill="none"/></svg>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 1c2.5 0 4.7 1 6.4 2.6l-1 1A7 7 0 0 0 7.5 2.5 7 7 0 0 0 2 4.6l-1-1A9 9 0 0 1 7.5 1Z" fill="#fff"/><path d="M7.5 4.5a5.5 5.5 0 0 1 4 1.6l-1 1A4 4 0 0 0 7.5 6 4 4 0 0 0 4.5 7l-1-1a5.5 5.5 0 0 1 4-1.5Z" fill="#fff"/><circle cx="7.5" cy="9" r="1.5" fill="#fff"/></svg>
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><path d="M16 14H2V8l5-5h6l3 3v8z" stroke="#fff" stroke-width="1.2"/></svg>
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x="0.5" y="0.5" width="17" height="10" rx="2" stroke="#fff"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#fff"/><rect x="18" y="3.5" width="1.5" height="4" rx="0.7" fill="#fff"/></svg>
+          </div>
+        </div>
+
+        <div class="navbar">
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-title" data-i18n="nav.wallet">Кошелек</div>
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2v.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#fff"/></svg></button>
+        </div>
+
+        <div class="page-content">
+          <p class="page-caption" data-i18n="caption.walletDescription">Здесь ваш кошелёк. Все заработанные деньги поступят на этот счёт.</p>
+
+          <div class="all-minutes">
+            <div class="am-title" data-i18n="minutes.title">Заработай до $1500</div>
+            <div class="am-row">
+              <div class="am-key" data-i18n="minutes.body">Получай 3 награды ежедневно</div>
+              <div class="am-val"><span class="num">30</span><span class="slash">/</span><span class="all-num" data-i18n="minutes.unit">365 дней</span></div>
+            </div>
+            <div class="am-progress"><div class="fill"></div></div>
+          </div>
+
+          <div class="balance">
+            <div class="balance-top">
+              <div class="bal-row">
+                <span class="val">≈$955.84</span>
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b9b9b9" stroke-width="1.5"/><circle cx="12" cy="8" r="1" fill="#b9b9b9"/><path d="M12 11v6" stroke="#b9b9b9" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="bal-label" data-i18n="balance.label">Balance</div>
+            </div>
+            <div class="tokens">
+              <div class="token-row"><div class="icon icon-doppy"></div><div class="text"><div class="name" data-i18n="token.doppy">DOPPY</div><div class="rate" data-i18n="token.doppyRate">1 ~ $2.63</div></div><div class="value"><div class="qty">144</div><div class="usd">~$378.72</div></div></div>
+              <div class="token-row"><div class="icon icon-bnh"></div><div class="text"><div class="name" data-i18n="token.bnh">BNH</div><div class="rate" data-i18n="token.bnhRate">1 ~ $10.64</div></div><div class="value"><div class="qty">6</div><div class="usd">~$63.84</div></div></div>
+              <div class="token-row"><div class="icon icon-lumy"></div><div class="text"><div class="name" data-i18n="token.lumy">LUMY</div></div><div class="value"><div class="qty">2</div><div class="usd">~$462.28</div></div></div>
+            </div>
+          </div>
+
+          <!-- Streak widget — full + button -->
+          <div class="streak-widget">
+            <div class="streak-title" data-i18n="streak2.title">Получи $7 в DOPPY</div>
+            <div class="streak-body" data-i18n="streak2.body">Заходи в ленту каждый день и собирай по 3 награды — 7 дней подряд!</div>
+            <div class="streak-days seven">
+              <div class="day compact"><div class="marker"></div><div class="label">1</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">2</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">3</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">4</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">5</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">6</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">7</div></div>
+            </div>
+            <button class="btn-reward" type="button" data-go="p1" data-i18n="streak2.cta">ЗАБРАТЬ НАГРАДУ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 4: Internal — cycle complete (claim button on top widget too) ============ -->
+    <section class="screen" id="s4" data-screen="s4">
+      <div class="page-internal">
+        <div class="top-banner"></div>
+
+        <div class="statusbar">
+          <div class="clock">09:30 <span class="pm">PM</span></div>
+          <div class="icons">
+            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M3 11l8-8" stroke="#fff" stroke-width="1" fill="none"/></svg>
+            <svg width="15" height="11" viewBox="0 0 15 11" fill="none"><path d="M7.5 1c2.5 0 4.7 1 6.4 2.6l-1 1A7 7 0 0 0 7.5 2.5 7 7 0 0 0 2 4.6l-1-1A9 9 0 0 1 7.5 1Z" fill="#fff"/><path d="M7.5 4.5a5.5 5.5 0 0 1 4 1.6l-1 1A4 4 0 0 0 7.5 6 4 4 0 0 0 4.5 7l-1-1a5.5 5.5 0 0 1 4-1.5Z" fill="#fff"/><circle cx="7.5" cy="9" r="1.5" fill="#fff"/></svg>
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none"><path d="M16 14H2V8l5-5h6l3 3v8z" stroke="#fff" stroke-width="1.2"/></svg>
+            <svg width="20" height="11" viewBox="0 0 20 11" fill="none"><rect x="0.5" y="0.5" width="17" height="10" rx="2" stroke="#fff"/><rect x="2" y="2" width="14" height="7" rx="1" fill="#fff"/><rect x="18" y="3.5" width="1.5" height="4" rx="0.7" fill="#fff"/></svg>
+          </div>
+        </div>
+
+        <div class="navbar">
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-title" data-i18n="nav.wallet">Кошелек</div>
+          <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#fff" stroke-width="1.5"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-.7.5-1.5 1-1.5 2v.5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#fff"/></svg></button>
+        </div>
+
+        <div class="page-content">
+          <p class="page-caption" data-i18n="caption.walletDescription">Здесь ваш кошелёк. Все заработанные деньги поступят на этот счёт.</p>
+
+          <div class="all-minutes">
+            <div class="am-title" data-i18n="minutes.title">Заработай до $1500</div>
+            <div class="am-row">
+              <div class="am-key" data-i18n="minutes.body">Получай 3 награды ежедневно</div>
+              <div class="am-val"><span class="num">30</span><span class="slash">/</span><span class="all-num" data-i18n="minutes.unit">365 дней</span></div>
+            </div>
+            <div class="am-progress"><div class="fill"></div></div>
+            <button class="btn-reward am-action" type="button" data-go="p2" data-i18n="minutes.cta">ЗАБРАТЬ НАГРАДУ</button>
+          </div>
+
+          <div class="balance">
+            <div class="balance-top">
+              <div class="bal-row">
+                <span class="val">≈$955.84</span>
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#b9b9b9" stroke-width="1.5"/><circle cx="12" cy="8" r="1" fill="#b9b9b9"/><path d="M12 11v6" stroke="#b9b9b9" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="bal-label" data-i18n="balance.label">Balance</div>
+            </div>
+            <div class="tokens">
+              <div class="token-row"><div class="icon icon-doppy"></div><div class="text"><div class="name" data-i18n="token.doppy">DOPPY</div><div class="rate" data-i18n="token.doppyRate">1 ~ $2.63</div></div><div class="value"><div class="qty">144</div><div class="usd">~$378.72</div></div></div>
+              <div class="token-row"><div class="icon icon-bnh"></div><div class="text"><div class="name" data-i18n="token.bnh">BNH</div><div class="rate" data-i18n="token.bnhRate">1 ~ $10.64</div></div><div class="value"><div class="qty">6</div><div class="usd">~$63.84</div></div></div>
+              <div class="token-row"><div class="icon icon-lumy"></div><div class="text"><div class="name" data-i18n="token.lumy">LUMY</div></div><div class="value"><div class="qty">2</div><div class="usd">~$462.28</div></div></div>
+            </div>
+          </div>
+
+          <div class="streak-widget">
+            <div class="streak-image coins-pair"></div>
+            <div class="streak-title" data-i18n="streak2.title">Получи $7 в DOPPY</div>
+            <div class="streak-body" data-i18n="streak2.body">Заходи в ленту каждый день и собирай по 3 награды — 7 дней подряд!</div>
+            <div class="streak-days seven">
+              <div class="day compact"><div class="marker"></div><div class="label">1</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">2</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">3</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">4</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">5</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">6</div></div>
+              <div class="day compact"><div class="marker"></div><div class="label">7</div></div>
+            </div>
+            <button class="btn-reward" type="button" data-go="p2" data-i18n="streak2.cta">ЗАБРАТЬ НАГРАДУ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 7: Refund — 24 days, 2 buttons ============ -->
+    <section class="screen" id="s7" data-screen="s7">
+      <div class="refund-page">
+        <div class="refund-saveArea"></div>
+        <div class="refund-content">
+          <div class="refund-navbar">
+            <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="refund-block">
+            <div class="refund-hero">
+              <span class="hero-text" data-i18n="refund.heroPrefix">Получи</span>
+              <span class="hero-pill" data-i18n="refund.heroPill">$1500</span>
+              <span class="hero-text" data-i18n="refund.heroSuffix">за 365 дней в приложении</span>
+            </div>
+            <div class="refund-subtitle" data-i18n="refund.subtitle">Смотри ленту, лови 3 награды в день<br>и получи бонус в монете DOPPY</div>
+          </div>
+
+          <div class="refund-progress-zone">
+            <div class="refund-progress-bar"><div class="fill" style="width:62%"></div></div>
+            <div class="streak-status-pill" style="left:62%; transform:translate(-50%,-50%)">
+              <div class="small"><span data-i18n="refund.streakLabel">Твой стрик:</span></div>
+              <div class="big"><span>24</span> <span data-i18n="refund.daysFew">дня</span></div>
+            </div>
+          </div>
+
+          <div class="refund-milestones">
+            <div class="milestone dim">
+              <div class="marker"></div>
+              <div class="day-count"><span>3</span> <span data-i18n="refund.daysFew">дня</span></div>
+              <div class="reward" data-i18n="refund.milestone3">Разблокировка<br>вывода</div>
+            </div>
+            <div class="milestone">
+              <div class="marker"></div>
+              <div class="day-count"><span>7</span> <span data-i18n="refund.daysMany">дней</span></div>
+              <div class="reward" data-i18n="refund.milestone7">$7</div>
+            </div>
+            <div class="milestone">
+              <div class="marker"></div>
+              <div class="day-count"><span>30</span> <span data-i18n="refund.daysMany">дней</span></div>
+              <div class="reward" data-i18n="refund.milestone30">$30</div>
+            </div>
+          </div>
+
+          <div class="refund-buttons">
+            <button class="btn-reward" type="button" data-go="s8" data-i18n="refund.btnVideo">СМОТРЕТЬ ВИДЕО</button>
+            <button class="btn-outline-green" type="button" data-i18n="refund.btnTerms">УСЛОВИЯ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 8: Refund — 30 days, 1 button ============ -->
+    <section class="screen" id="s8" data-screen="s8">
+      <div class="refund-page">
+        <div class="refund-saveArea"></div>
+        <div class="refund-content">
+          <div class="refund-navbar">
+            <button class="icon-btn" type="button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="refund-block">
+            <div class="refund-hero">
+              <span class="hero-text" data-i18n="refund.heroPrefix">Получи</span>
+              <span class="hero-pill" data-i18n="refund.heroPill">$1500</span>
+              <span class="hero-text" data-i18n="refund.heroSuffix">за 365 дней в приложении</span>
+            </div>
+            <div class="refund-subtitle" data-i18n="refund.subtitle">Смотри ленту, лови 3 награды в день<br>и получи бонус в монете DOPPY</div>
+          </div>
+
+          <div class="refund-progress-zone">
+            <div class="refund-progress-bar"><div class="fill" style="width:82%"></div></div>
+            <div class="streak-status-pill" style="left:82%; transform:translate(-50%,-50%)">
+              <div class="small"><span data-i18n="refund.streakLabel">Твой стрик:</span></div>
+              <div class="big"><span>30</span> <span data-i18n="refund.daysMany">дней</span></div>
+            </div>
+          </div>
+
+          <div class="refund-milestones">
+            <div class="milestone dim">
+              <div class="marker"></div>
+              <div class="day-count"><span>3</span> <span data-i18n="refund.daysFew">дня</span></div>
+              <div class="reward" data-i18n="refund.milestone3">Разблокировка<br>вывода</div>
+            </div>
+            <div class="milestone">
+              <div class="marker"></div>
+              <div class="day-count"><span>7</span> <span data-i18n="refund.daysMany">дней</span></div>
+              <div class="reward" data-i18n="refund.milestone7">$7</div>
+            </div>
+            <div class="milestone active">
+              <div class="marker"></div>
+              <div class="day-count"><span>30</span> <span data-i18n="refund.daysMany">дней</span></div>
+              <div class="reward" data-i18n="refund.milestone30">$30</div>
+            </div>
+          </div>
+
+          <div class="refund-buttons">
+            <button class="btn-reward" type="button" data-go="s1" data-i18n="refund.btnClaim">ЗАБРАТЬ НАГРАДУ</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ POPUPS ============ -->
+    <!-- Popup 1: unlocked DOPPY withdrawals -->
+    <div class="popup-overlay" id="p1" data-popup="p1">
+      <div class="popup-card">
+        <button class="popup-cross" type="button" data-go="s4" aria-label="close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#b9b9b9" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="popup-image" style="background-image:url('assets/popup_doppy.png')"></div>
+        <div class="popup-text">
+          <div class="popup-title" data-i18n="popup1.title">Поздравляем! Ты разблокировал вывод DOPPY</div>
+          <div class="popup-subtitle" data-i18n="popup1.subtitle">Оставайся активным и получай более крутые награды</div>
+        </div>
+        <button class="btn-reward" type="button" data-go="s4" data-i18n="popup1.cta">ЗАБРАТЬ НАГРАДУ</button>
+      </div>
+    </div>
+
+    <!-- Popup 2: 7 DOPPY reward -->
+    <div class="popup-overlay" id="p2" data-popup="p2">
+      <div class="popup-card">
+        <button class="popup-cross" type="button" data-go="s7" aria-label="close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#b9b9b9" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <div class="popup-image" style="background-image:url('assets/popup_money_bag.png')"></div>
+        <div class="popup-text">
+          <div class="popup-title" data-i18n="popup2.title">Поздравляем!<br>Ты получил награду —<br>7 DOPPY!</div>
+          <div class="popup-subtitle" data-i18n="popup2.subtitle">Оставайся активным и получай более крутые награды</div>
+        </div>
+        <button class="btn-reward" type="button" data-go="s7" data-i18n="popup2.cta">ЗАБРАТЬ НАГРАДУ</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const translations = {
+  ru: {
+    'nav.wallet': 'Кошелек',
+    'caption.walletDescription': 'Здесь ваш кошелёк. Все заработанные деньги поступят на этот счёт.',
+    'minutes.title': 'Заработай до $1500',
+    'minutes.body': 'Получай 3 награды ежедневно',
+    'minutes.unit': '365 дней',
+    'minutes.cta': 'ЗАБРАТЬ НАГРАДУ',
+    'balance.label': 'Balance',
+    'token.doppy': 'DOPPY',
+    'token.bnh': 'BNH',
+    'token.lumy': 'LUMY',
+    'token.doppyRate': '1 ~ $2.63',
+    'token.bnhRate': '1 ~ $10.64',
+    'streak1.title': 'Разблокируй Вывод DOPPY',
+    'streak1.body': 'Заходи в ленту каждый день и собирай по 3 награды — 3 дня подряд, и вывод разблокирован!',
+    'streak1.day': 'день',
+    'streak1.offerTitle': 'Активируй буст заработка<br>и разблокируй вывод сразу',
+    'streak1.offerCta': 'АКТИВИРОВАТЬ',
+    'streak2.title': 'Получи $7 в DOPPY',
+    'streak2.body': 'Заходи в ленту каждый день и собирай по 3 награды — 7 дней подряд!',
+    'streak2.cta': 'ЗАБРАТЬ НАГРАДУ',
+    'popup1.title': 'Поздравляем! Ты разблокировал вывод DOPPY',
+    'popup1.subtitle': 'Оставайся активным и получай более крутые награды',
+    'popup1.cta': 'ЗАБРАТЬ НАГРАДУ',
+    'popup2.title': 'Поздравляем!<br>Ты получил награду —<br>7 DOPPY!',
+    'popup2.subtitle': 'Оставайся активным и получай более крутые награды',
+    'popup2.cta': 'ЗАБРАТЬ НАГРАДУ',
+    'refund.heroPrefix': 'Получи',
+    'refund.heroPill': '$1500',
+    'refund.heroSuffix': 'за 365 дней в приложении',
+    'refund.subtitle': 'Смотри ленту, лови 3 награды в день<br>и получи бонус в монете DOPPY',
+    'refund.streakLabel': 'Твой стрик:',
+    'refund.daysFew': 'дня',
+    'refund.daysMany': 'дней',
+    'refund.milestone3': 'Разблокировка<br>вывода',
+    'refund.milestone7': '$7',
+    'refund.milestone30': '$30',
+    'refund.btnVideo': 'СМОТРЕТЬ ВИДЕО',
+    'refund.btnTerms': 'УСЛОВИЯ',
+    'refund.btnClaim': 'ЗАБРАТЬ НАГРАДУ'
+  },
+  en: {
+    'nav.wallet': 'Wallet',
+    'caption.walletDescription': 'This is your wallet. All your earnings will land here.',
+    'minutes.title': 'Earn up to $1500',
+    'minutes.body': 'Collect 3 rewards every day',
+    'minutes.unit': '365 days',
+    'minutes.cta': 'CLAIM REWARD',
+    'balance.label': 'Balance',
+    'token.doppy': 'DOPPY',
+    'token.bnh': 'BNH',
+    'token.lumy': 'LUMY',
+    'token.doppyRate': '1 ~ $2.63',
+    'token.bnhRate': '1 ~ $10.64',
+    'streak1.title': 'Unlock DOPPY withdrawals',
+    'streak1.body': 'Open the feed daily and earn 3 rewards — 3 days in a row, and withdrawals unlock!',
+    'streak1.day': 'day',
+    'streak1.offerTitle': 'Activate the earnings boost<br>and unlock withdrawals right away',
+    'streak1.offerCta': 'ACTIVATE',
+    'streak2.title': 'Earn $7 in DOPPY',
+    'streak2.body': 'Open the feed daily and earn 3 rewards — 7 days in a row!',
+    'streak2.cta': 'CLAIM REWARD',
+    'popup1.title': "Congrats! You've unlocked DOPPY withdrawals",
+    'popup1.subtitle': 'Stay active and earn even cooler rewards',
+    'popup1.cta': 'CLAIM REWARD',
+    'popup2.title': "Congrats!<br>You've earned a reward —<br>7 DOPPY!",
+    'popup2.subtitle': 'Stay active and earn even cooler rewards',
+    'popup2.cta': 'CLAIM REWARD',
+    'refund.heroPrefix': 'Earn',
+    'refund.heroPill': '$1500',
+    'refund.heroSuffix': 'in 365 days in the app',
+    'refund.subtitle': 'Watch the feed, grab 3 rewards a day<br>and earn your bonus in DOPPY',
+    'refund.streakLabel': 'Your streak:',
+    'refund.daysFew': 'days',
+    'refund.daysMany': 'days',
+    'refund.milestone3': 'Unlock<br>withdrawals',
+    'refund.milestone7': '$7',
+    'refund.milestone30': '$30',
+    'refund.btnVideo': 'WATCH VIDEO',
+    'refund.btnTerms': 'TERMS',
+    'refund.btnClaim': 'CLAIM REWARD'
+  }
+};
+
+let currentLang = 'ru';
+
+function applyLang(lang){
+  currentLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const val = translations[lang][key];
+    if(val !== undefined){
+      // For elements that mix translated text with static content (numbers),
+      // we replace innerHTML when value contains <br>, otherwise we look for
+      // a child <span data-i18n> structure already in place. Here we just
+      // replace innerHTML uniformly — supports <br> from translation strings.
+      el.innerHTML = val;
+    }
+  });
+  document.querySelectorAll('.lang-toggle button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+}
+
+document.querySelectorAll('.lang-toggle button').forEach(b=>{
+  b.addEventListener('click', ()=> applyLang(b.dataset.lang));
+});
+
+// ===== Navigation =====
+const screenEls = document.querySelectorAll('.screen');
+const popupEls = document.querySelectorAll('.popup-overlay');
+
+function showScreen(id){
+  screenEls.forEach(s => s.classList.toggle('active', s.id === id));
+  // scroll to top of new screen
+  const el = document.getElementById(id);
+  if(el) el.scrollTop = 0;
+}
+function showPopup(id){
+  popupEls.forEach(p => p.classList.toggle('active', p.id === id));
+}
+function hidePopups(){
+  popupEls.forEach(p => p.classList.remove('active'));
+}
+
+document.querySelectorAll('[data-go]').forEach(el=>{
+  el.addEventListener('click', e=>{
+    e.stopPropagation();
+    const target = el.dataset.go;
+    if(target.startsWith('p')){
+      showPopup(target);
+    } else if(target.startsWith('s')){
+      hidePopups();
+      showScreen(target);
+    }
+  });
+});
+
+// Special re-mapping: tap-hint elements (e.g. screen 2 streak widget) should
+// also navigate, but children buttons should not trigger them. handled with
+// stopPropagation above.
+
+// Init
+applyLang('ru');
+</script>
+</body>
+</html>
